@@ -1,0 +1,628 @@
+{
+  "paragraphs": [
+    {
+      "title": "Configure Spark Interpreter",
+      "text": "%spark.conf\n\nspark.jars.packages io.delta:delta-core_2.12:2.0.0\nspark.sql.extensions io.delta.sql.DeltaSparkSessionExtension\nspark.sql.catalog.spark_catalog org.apache.spark.sql.delta.catalog.DeltaCatalog\nspark.sql.catalogImplementation hive\nspark.sql.warehouse.dir /tmp/warehouse\n",
+      "user": "anonymous",
+      "dateUpdated": "2022-09-02 12:28:43.403",
+      "progress": 0,
+      "config": {
+        "editorSetting": {
+          "language": "text",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 12.0,
+        "editorMode": "ace/mode/text",
+        "fontSize": 9.0,
+        "title": true,
+        "results": {},
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": []
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1661879052723_1717563558",
+      "id": "paragraph_1637823857073_1402198166",
+      "dateCreated": "2022-08-30 17:04:12.723",
+      "dateStarted": "2022-09-02 12:28:43.451",
+      "dateFinished": "2022-09-02 12:28:43.472",
+      "status": "FINISHED"
+    },
+    {
+      "text": "%spark\nprint (\"Configured the spark interpreter \" + spark )\n",
+      "user": "anonymous",
+      "dateUpdated": "2022-09-02 13:09:00.652",
+      "progress": 0,
+      "config": {
+        "editorSetting": {
+          "language": "scala",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 12.0,
+        "editorMode": "ace/mode/scala",
+        "fontSize": 9.0,
+        "results": {},
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "TEXT",
+            "data": "Configured the spark interpreter org.apache.spark.sql.SparkSession@16e8edc4"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1661879110758_1631689705",
+      "id": "paragraph_1661879110758_1631689705",
+      "dateCreated": "2022-08-30 17:05:10.759",
+      "dateStarted": "2022-09-02 13:09:00.664",
+      "dateFinished": "2022-09-02 13:09:01.037",
+      "status": "FINISHED"
+    },
+    {
+      "title": "Create DataBase",
+      "text": "%spark.sql\n--DROP DATABASE states cascade; (for clean up)\nCREATE DATABASE IF NOT EXISTS states;\n\n\n",
+      "user": "anonymous",
+      "dateUpdated": "2022-09-02 12:31:36.810",
+      "progress": 0,
+      "config": {
+        "editorSetting": {
+          "language": "sql",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 12.0,
+        "editorMode": "ace/mode/sql",
+        "fontSize": 9.0,
+        "title": true,
+        "results": {},
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": []
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1661879052724_1545079825",
+      "id": "paragraph_1637823873165_1235458809",
+      "dateCreated": "2022-08-30 17:04:12.724",
+      "dateStarted": "2022-09-02 12:31:13.233",
+      "dateFinished": "2022-09-02 12:31:13.667",
+      "status": "FINISHED"
+    },
+    {
+      "title": "Verify the presence of incoming data",
+      "text": "%sh\n\nls -l /landingdata\n",
+      "user": "anonymous",
+      "dateUpdated": "2022-09-02 12:32:42.066",
+      "progress": 0,
+      "config": {
+        "editorSetting": {
+          "language": "sh",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": false
+        },
+        "colWidth": 12.0,
+        "editorMode": "ace/mode/sh",
+        "fontSize": 9.0,
+        "results": {},
+        "enabled": true,
+        "title": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "TEXT",
+            "data": "total 4\n-rwxrwxrwx 1 root root 1647 Sep  2 08:19 datafile.csv\n"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1662051908549_80069748",
+      "id": "paragraph_1662051908549_80069748",
+      "dateCreated": "2022-09-01 17:05:08.549",
+      "dateStarted": "2022-09-02 12:32:42.078",
+      "dateFinished": "2022-09-02 12:32:43.869",
+      "status": "FINISHED"
+    },
+    {
+      "title": "Create Delta Table - Using SQL - Bronze Layer",
+      "text": "%spark.sql\n\nDROP TABLE  IF EXISTS states.temploadmedicalstats ;\nCREATE TABLE states.temploadmedicalstats\n  USING csv\n  OPTIONS (path \"/landingdata/\", header \"true\", inferSchema \"true\");\n\nCREATE TABLE states.medicalstats_bronze\nUSING delta\nAS SELECT * FROM states.temploadmedicalstats;\n\n--DROP TEMP TABLE\ndrop table states.temploadmedicalstats;\n\n\n",
+      "user": "anonymous",
+      "dateUpdated": "2022-09-02 12:52:57.090",
+      "progress": 1,
+      "config": {
+        "editorSetting": {
+          "language": "sql",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 12.0,
+        "editorMode": "ace/mode/sql",
+        "fontSize": 9.0,
+        "editorHide": false,
+        "title": true,
+        "results": {},
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": []
+      },
+      "apps": [],
+      "runtimeInfos": {
+        "jobUrl": {
+          "propertyName": "jobUrl",
+          "label": "SPARK JOB",
+          "tooltip": "View in Spark web UI",
+          "group": "spark",
+          "values": [
+            {
+              "jobUrl": "http://1256d0145567:4040/jobs/job?id\u003d0"
+            },
+            {
+              "jobUrl": "http://1256d0145567:4040/jobs/job?id\u003d1"
+            },
+            {
+              "jobUrl": "http://1256d0145567:4040/jobs/job?id\u003d2"
+            },
+            {
+              "jobUrl": "http://1256d0145567:4040/jobs/job?id\u003d3"
+            },
+            {
+              "jobUrl": "http://1256d0145567:4040/jobs/job?id\u003d4"
+            },
+            {
+              "jobUrl": "http://1256d0145567:4040/jobs/job?id\u003d5"
+            }
+          ],
+          "interpreterSettingId": "spark"
+        }
+      },
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1661879271346_1320676715",
+      "id": "paragraph_1661879271346_1320676715",
+      "dateCreated": "2022-08-30 17:07:51.346",
+      "dateStarted": "2022-09-02 12:33:00.769",
+      "dateFinished": "2022-09-02 12:33:15.044",
+      "status": "FINISHED"
+    },
+    {
+      "title": "Verify creation of Bronze Layer",
+      "text": "%spark.sql\n-- describe states.medicalstats_bronze\nselect * from  states.medicalstats_bronze",
+      "user": "anonymous",
+      "dateUpdated": "2022-09-02 13:09:39.017",
+      "progress": 98,
+      "config": {
+        "editorSetting": {
+          "language": "sql",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 12.0,
+        "editorMode": "ace/mode/sql",
+        "fontSize": 9.0,
+        "results": {
+          "0": {
+            "graph": {
+              "mode": "table",
+              "height": 300.0,
+              "optionOpen": false,
+              "setting": {
+                "table": {
+                  "tableGridState": {},
+                  "tableColumnTypeState": {
+                    "names": {
+                      "S.No.": "string",
+                      "State/UT": "string",
+                      "Required": "string",
+                      "Sanctioned": "string",
+                      "InPosition": "string",
+                      "Vacant": "string",
+                      "Shortfall": "string"
+                    },
+                    "updated": false
+                  },
+                  "tableOptionSpecHash": "[{\"name\":\"useFilter\",\"valueType\":\"boolean\",\"defaultValue\":false,\"widget\":\"checkbox\",\"description\":\"Enable filter for columns\"},{\"name\":\"showPagination\",\"valueType\":\"boolean\",\"defaultValue\":false,\"widget\":\"checkbox\",\"description\":\"Enable pagination for better navigation\"},{\"name\":\"showAggregationFooter\",\"valueType\":\"boolean\",\"defaultValue\":false,\"widget\":\"checkbox\",\"description\":\"Enable a footer for displaying aggregated values\"}]",
+                  "tableOptionValue": {
+                    "useFilter": false,
+                    "showPagination": false,
+                    "showAggregationFooter": false
+                  },
+                  "updated": false,
+                  "initialized": false
+                }
+              },
+              "commonSetting": {}
+            }
+          }
+        },
+        "enabled": true,
+        "title": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "TABLE",
+            "data": "S.No.\tState/UT\tRequired\tSanctioned\tInPosition\tVacant\tShortfall\n1\tAndhra Pradesh\t1,624\t1,390\t1,149\t241\t475\n2\tArunachal Pradesh\t97\tNA\tNA\tNA\tNA\n3\tAssam\t938\tNA\t452\tNA\t486\n4\tBihar## \t1,863\t850\t358\t492\t1,505\n5\tChhattisgarh\t741\t1,034\t749\t285\tSurplus\n6\tGoa\t19\t20\t18\t2\t1\n7\tGujarat\t1,123\t1,084\t875\t209\t248\n8\tHaryana\t444\t484\t398\t86\t46\n9\tHimachal Pradesh\t453\t350\t245\t105\t208\n10\tJammu \u0026 Kashmir\t397\t375\t88\t287\t309\n11\tJharkhand\t330\tNA\t85\tNA\t245\n12\tKarnataka\t2,310\t3,813\t1,036\t2,777\t1,274\n13\tKerala\t809\t809\t795\t14\t14\n14\tMadhya Pradesh \t1,156\t726\t546\t180\t610\n15\tMaharashtra\t1,809\t3,814\t2,955\t859\tSurplus\n16\tManipur\t80\t73\t72\t1\t8\n17\tMeghalaya\t109\t85\t79\t6\t30\n18\tMizoram##\t57\t57\t12\t45\t45\n19\tNagaland##\t126\t15\t16\tSurplus\t110\n20\tOdisha\t1,228\t1,162\t920\t242\t308\n21\tPunjab\t446\t441\t387\t54\t59\n22\tRajasthan\t1,517\t1,369\t1,420\tSurplus\t97\n23\tSikkim\t24\t24\t18\t6\t6\n24\tTamil Nadu\t1,204\t1,204\t1,022\t182\t182\n25\tTripura\t79\tNA\t7\tNA\t72\n26\tUttarakhand\t239\t141\t137\t4\t102\n27\tUttar Pradesh#\t3,692\t3,811\t2,040\t1,771\t1,652\n28\tWest Bengal\t909\t0\t0\t0\t909\n29\tA\u0026 N Islands\t19\t19\t10\t9\t9\n30\tChandigarh  \t0\t0\t0\t0\t0\n31\tD \u0026 N Haveli\t6\t7\t1\t6\t5\n32\tDaman \u0026 Diu\t3\t0\t0\t0\t3\n33\tDelhi\t8\t12\t8\t4\t0\n34\tLakshadweep\t4\t1\t1\t0\t3\n"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {
+        "jobUrl": {
+          "propertyName": "jobUrl",
+          "label": "SPARK JOB",
+          "tooltip": "View in Spark web UI",
+          "group": "spark",
+          "values": [
+            {
+              "jobUrl": "http://1256d0145567:4040/jobs/job?id\u003d10"
+            },
+            {
+              "jobUrl": "http://1256d0145567:4040/jobs/job?id\u003d11"
+            }
+          ],
+          "interpreterSettingId": "spark"
+        }
+      },
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1662054843610_1556294905",
+      "id": "paragraph_1662054843610_1556294905",
+      "dateCreated": "2022-09-01 17:54:03.610",
+      "dateStarted": "2022-09-02 13:09:39.027",
+      "dateFinished": "2022-09-02 13:09:39.616",
+      "status": "FINISHED"
+    },
+    {
+      "title": "Create Delta Table - Using Spark- Bronze Layer",
+      "text": "%spark\nvar df \u003d spark.read.option(\"header\", \"true\").csv(\"/landingdata/datafile.csv\")\n//df.show()\ndf.write.mode(\"overwrite\").format(\"delta\").saveAsTable(\"states.MEDICALSTATS\")\n",
+      "user": "anonymous",
+      "dateUpdated": "2022-09-02 12:53:09.647",
+      "progress": 0,
+      "config": {
+        "editorSetting": {
+          "language": "scala",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 12.0,
+        "editorMode": "ace/mode/scala",
+        "fontSize": 9.0,
+        "results": {},
+        "enabled": true,
+        "title": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "apps": [],
+      "runtimeInfos": {
+        "jobUrl": {
+          "propertyName": "jobUrl",
+          "label": "SPARK JOB",
+          "tooltip": "View in Spark web UI",
+          "group": "spark",
+          "values": [
+            {
+              "jobUrl": "http://1256d0145567:4040/jobs/job?id\u003d3"
+            },
+            {
+              "jobUrl": "http://1256d0145567:4040/jobs/job?id\u003d4"
+            },
+            {
+              "jobUrl": "http://1256d0145567:4040/jobs/job?id\u003d5"
+            },
+            {
+              "jobUrl": "http://1256d0145567:4040/jobs/job?id\u003d6"
+            },
+            {
+              "jobUrl": "http://1256d0145567:4040/jobs/job?id\u003d7"
+            },
+            {
+              "jobUrl": "http://1256d0145567:4040/jobs/job?id\u003d8"
+            }
+          ],
+          "interpreterSettingId": "spark"
+        }
+      },
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1662052628310_2018442702",
+      "id": "paragraph_1662052628310_2018442702",
+      "dateCreated": "2022-09-01 17:17:08.310",
+      "dateStarted": "2022-09-02 10:34:56.155",
+      "dateFinished": "2022-09-02 10:35:08.988",
+      "status": "FINISHED"
+    },
+    {
+      "title": "Make Some Tranformations and Create Gold Layer Tables ",
+      "text": "%spark.sql\n-- describe states.medicalstats_bronze\nCREATE TABLE states.medicalstats_withacuteshortfall_gold\nUSING delta\nselect * from  states.medicalstats_bronze where shortfall \u003e 200;\n",
+      "user": "anonymous",
+      "dateUpdated": "2022-09-02 13:19:28.319",
+      "progress": 0,
+      "config": {
+        "editorSetting": {
+          "language": "sql",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 12.0,
+        "editorMode": "ace/mode/sql",
+        "fontSize": 9.0,
+        "title": true,
+        "results": {
+          "0": {
+            "graph": {
+              "mode": "table",
+              "height": 300.0,
+              "optionOpen": false,
+              "setting": {
+                "table": {
+                  "tableGridState": {},
+                  "tableColumnTypeState": {
+                    "names": {
+                      "S.No.": "string",
+                      "State/UT": "string",
+                      "Required": "string",
+                      "Sanctioned": "string",
+                      "InPosition": "string",
+                      "Vacant": "string",
+                      "Shortfall": "string"
+                    },
+                    "updated": false
+                  },
+                  "tableOptionSpecHash": "[{\"name\":\"useFilter\",\"valueType\":\"boolean\",\"defaultValue\":false,\"widget\":\"checkbox\",\"description\":\"Enable filter for columns\"},{\"name\":\"showPagination\",\"valueType\":\"boolean\",\"defaultValue\":false,\"widget\":\"checkbox\",\"description\":\"Enable pagination for better navigation\"},{\"name\":\"showAggregationFooter\",\"valueType\":\"boolean\",\"defaultValue\":false,\"widget\":\"checkbox\",\"description\":\"Enable a footer for displaying aggregated values\"}]",
+                  "tableOptionValue": {
+                    "useFilter": false,
+                    "showPagination": false,
+                    "showAggregationFooter": false
+                  },
+                  "updated": false,
+                  "initialized": false
+                }
+              },
+              "commonSetting": {}
+            }
+          }
+        },
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": []
+      },
+      "apps": [],
+      "runtimeInfos": {
+        "jobUrl": {
+          "propertyName": "jobUrl",
+          "label": "SPARK JOB",
+          "tooltip": "View in Spark web UI",
+          "group": "spark",
+          "values": [
+            {
+              "jobUrl": "http://1256d0145567:4040/jobs/job?id\u003d19"
+            },
+            {
+              "jobUrl": "http://1256d0145567:4040/jobs/job?id\u003d20"
+            },
+            {
+              "jobUrl": "http://1256d0145567:4040/jobs/job?id\u003d21"
+            },
+            {
+              "jobUrl": "http://1256d0145567:4040/jobs/job?id\u003d22"
+            },
+            {
+              "jobUrl": "http://1256d0145567:4040/jobs/job?id\u003d23"
+            }
+          ],
+          "interpreterSettingId": "spark"
+        }
+      },
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1661879052724_467892419",
+      "id": "paragraph_1637850601188_1821524381",
+      "dateCreated": "2022-08-30 17:04:12.724",
+      "dateStarted": "2022-09-02 13:19:28.331",
+      "dateFinished": "2022-09-02 13:19:30.473",
+      "status": "FINISHED"
+    },
+    {
+      "text": "%spark.sql\n-- describe states.medicalstats_bronze\nCREATE TABLE states.medicalstats_withmoderateshortfall_gold\nUSING delta\nselect * from  states.medicalstats_bronze where shortfall \u003c 200;",
+      "user": "anonymous",
+      "dateUpdated": "2022-09-02 13:21:20.272",
+      "progress": 66,
+      "config": {
+        "editorSetting": {
+          "language": "sql",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 12.0,
+        "editorMode": "ace/mode/sql",
+        "fontSize": 9.0,
+        "results": {},
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": []
+      },
+      "apps": [],
+      "runtimeInfos": {
+        "jobUrl": {
+          "propertyName": "jobUrl",
+          "label": "SPARK JOB",
+          "tooltip": "View in Spark web UI",
+          "group": "spark",
+          "values": [
+            {
+              "jobUrl": "http://1256d0145567:4040/jobs/job?id\u003d24"
+            },
+            {
+              "jobUrl": "http://1256d0145567:4040/jobs/job?id\u003d25"
+            },
+            {
+              "jobUrl": "http://1256d0145567:4040/jobs/job?id\u003d26"
+            },
+            {
+              "jobUrl": "http://1256d0145567:4040/jobs/job?id\u003d27"
+            },
+            {
+              "jobUrl": "http://1256d0145567:4040/jobs/job?id\u003d28"
+            }
+          ],
+          "interpreterSettingId": "spark"
+        }
+      },
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1662124842753_1747216133",
+      "id": "paragraph_1662124842753_1747216133",
+      "dateCreated": "2022-09-02 13:20:42.753",
+      "dateStarted": "2022-09-02 13:21:20.284",
+      "dateFinished": "2022-09-02 13:21:22.110",
+      "status": "FINISHED"
+    },
+    {
+      "title": "Verify Gold Layer Tables",
+      "text": "%spark.sql\n\nSHOW TABLES FROM states",
+      "user": "anonymous",
+      "dateUpdated": "2022-09-02 13:22:22.390",
+      "progress": 100,
+      "config": {
+        "editorSetting": {
+          "language": "sql",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 12.0,
+        "editorMode": "ace/mode/sql",
+        "fontSize": 9.0,
+        "title": true,
+        "results": {
+          "0": {
+            "graph": {
+              "mode": "table",
+              "height": 300.0,
+              "optionOpen": false,
+              "setting": {
+                "table": {
+                  "tableGridState": {},
+                  "tableColumnTypeState": {
+                    "names": {
+                      "namespace": "string",
+                      "tableName": "string",
+                      "isTemporary": "string"
+                    },
+                    "updated": false
+                  },
+                  "tableOptionSpecHash": "[{\"name\":\"useFilter\",\"valueType\":\"boolean\",\"defaultValue\":false,\"widget\":\"checkbox\",\"description\":\"Enable filter for columns\"},{\"name\":\"showPagination\",\"valueType\":\"boolean\",\"defaultValue\":false,\"widget\":\"checkbox\",\"description\":\"Enable pagination for better navigation\"},{\"name\":\"showAggregationFooter\",\"valueType\":\"boolean\",\"defaultValue\":false,\"widget\":\"checkbox\",\"description\":\"Enable a footer for displaying aggregated values\"}]",
+                  "tableOptionValue": {
+                    "useFilter": false,
+                    "showPagination": false,
+                    "showAggregationFooter": false
+                  },
+                  "updated": false,
+                  "initialized": false
+                }
+              },
+              "commonSetting": {}
+            }
+          }
+        },
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "TABLE",
+            "data": "namespace\ttableName\tisTemporary\nstates\tmedicalstats_bronze\tfalse\nstates\tmedicalstats_withacuteshortfall_gold\tfalse\nstates\tmedicalstats_withmoderateshortfall_gold\tfalse\n"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1661879052724_1746515318",
+      "id": "paragraph_1637939766693_1524904746",
+      "dateCreated": "2022-08-30 17:04:12.724",
+      "dateStarted": "2022-09-02 13:22:22.404",
+      "dateFinished": "2022-09-02 13:22:22.426",
+      "status": "FINISHED"
+    }
+  ],
+  "name": "Deep Dive into Delta Lake-Part2",
+  "id": "2HCEQA3UT",
+  "defaultInterpreterGroup": "spark",
+  "version": "0.10.1",
+  "noteParams": {},
+  "noteForms": {},
+  "angularObjects": {},
+  "config": {
+    "isZeppelinNotebookCronEnable": false
+  },
+  "info": {}
+}
